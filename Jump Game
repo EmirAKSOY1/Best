@@ -1,0 +1,35 @@
+CREATE OR REPLACE TYPE array_type IS TABLE OF NUMBER;
+/
+CREATE OR REPLACE FUNCTION can_jump(nums IN array_type) RETURN VARCHAR2 IS
+    maxReach NUMBER := 0;  
+    i NUMBER := 0;         
+BEGIN
+    WHILE i <= nums.COUNT - 1 LOOP
+        
+        IF i > maxReach THEN
+            RETURN 'FALSE';
+        END IF;
+
+        maxReach := GREATEST(maxReach, i + nums(i + 1));
+
+        IF maxReach >= nums.COUNT - 1 THEN
+            RETURN 'TRUE';
+        END IF;
+
+        i := i + 1;
+    END LOOP;
+	
+RETURN 'FALSE';
+END;
+/
+DECLARE
+    myarray array_type;
+BEGIN
+    myarray := array_type(2,3,1,1,4);
+    DBMS_OUTPUT.PUT_LINE(can_jump(myarray));
+
+    myarray := array_type(1,1,1,1,40000);
+	DBMS_OUTPUT.PUT_LINE(myarray(0));
+    DBMS_OUTPUT.PUT_LINE(can_jump(myarray));
+END;
+/
