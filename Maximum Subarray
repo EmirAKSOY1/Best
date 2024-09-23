@@ -1,0 +1,68 @@
+/*
+Tüm sub-arraylerin toplamını bulup
+en büyüğe göre karşılaştırıp
+en son en büyük arrayin toplamını verir.
+*/
+CREATE OR REPLACE TYPE t_array IS TABLE OF NUMBER;
+/
+CREATE OR REPLACE FUNCTION maximum_subarray(p_array IN t_array)
+RETURN NUMBER IS
+v_subarray t_array;--anlık olarak sub arrayleri tutar
+v_start_index NUMBER;--sub arrayşn başlangıç indxi
+v_end_index NUMBER;--sub arrayin bitiş indexi
+max_v NUMBER := 0;--max sub aray toplamı
+sub NUMBER := 0;--anlık subb array toplamı
+BEGIN
+FOR v_start_index IN 1..p_array.COUNT LOOP--Önce p_arraydeki tüm sayıları geziyor
+FOR v_end_index IN v_start_index..p_array.COUNT LOOP--sub arrayleri oluşturmak için
+v_subarray := t_array();
+FOR i IN v_start_index..v_end_index LOOP--Oluşan sub arrayleri yerlerine yerleştirildi
+v_subarray.EXTEND;
+v_subarray(v_subarray.COUNT) := p_array(i);
+END LOOP;
+FOR i IN 1..v_subarray.COUNT LOOP--Oluşan sub arrayin toplamı
+sub := sub + v_subarray(i);
+END LOOP;
+IF sub >= max_v THEN
+max_v := sub;
+END IF;
+sub := 0;
+END LOOP;
+END LOOP;
+RETURN max_v;
+END;
+/
+DECLARE
+r1 t_array := t_array(-2,1,-3,4,-1,2,1,-5,4);
+r2 t_array := t_array(1);
+r3 t_array := t_array(5,4,-1,7,8);
+BEGIN
+DBMS_OUTPUT.PUT_LINE(maximum_subarray(r1));
+DBMS_OUTPUT.PUT_LINE(maximum_subarray(r2));
+DBMS_OUTPUT.PUT_LINE(maximum_subarray(r3));
+END;
+/
+Alternatif Çözüm(Kadane's Algorithm) Bu çözümü leetcode da başkalarının algoritmasını incelerken keşfettim . Daha az döngü ile kodu azaltıp işlem maliyetini azaltıyor.
+CREATE OR REPLACE FUNCTION maximum_subarray(p_array IN t_array)
+RETURN NUMBER IS
+max_v NUMBER;
+current_sum NUMBER := 0;
+BEGIN
+max_v := p_array(1);
+FOR i IN 1..p_array.COUNT LOOP
+current_sum := GREATEST(p_array(i), current_sum + p_array(i));
+max_v := GREATEST(max_v, current_sum);
+END LOOP;
+RETURN max_v;
+END;
+/
+DECLARE
+r1 t_array := t_array(-2,1,-3,4,-1,2,1,-5,4);
+r2 t_array := t_array(1);
+r3 t_array := t_array(5,4,-1,7,8);
+BEGIN
+DBMS_OUTPUT.PUT_LINE(maximum_subarray(r1));
+DBMS_OUTPUT.PUT_LINE(maximum_subarray(r2));
+DBMS_OUTPUT.PUT_LINE(maximum_subarray(r3));
+END;
+/
