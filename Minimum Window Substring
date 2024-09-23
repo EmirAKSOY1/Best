@@ -1,0 +1,45 @@
+CREATE OR REPLACE TYPE char_table AS TABLE OF VARCHAR2(1);
+/
+CREATE OR REPLACE FUNCTION min_win_subs(s IN VARCHAR2, t IN VARCHAR2) RETURN VARCHAR2 IS
+v_chars char_table := char_table();
+v_char CHAR(1);
+v_substr VARCHAR2(255);--oluşturduğumuz substr ler
+v_pos NUMBER;--indexi tutar
+min_len NUMBER := LENGTH(s) + 1;
+min_substr VARCHAR2(255);--En küçük substrr yi saklamak için nihai sonuç da bu olacak returnlediğimiz değer
+found BOOLEAN;--Bulunup bulunmadığını tutar
+BEGIN
+FOR i IN 1..LENGTH(t) LOOP /*Fpnksiyon parametressindeki t yi tek tek oluturduğumuz tabloya atıyoruz*/
+v_chars.EXTEND;
+v_chars(v_chars.COUNT) := SUBSTR(t, i, 1);
+END LOOP;
+if length(s)>length(t) then
+FOR i IN 1..LENGTH(s) LOOP
+FOR j IN i..LENGTH(s) LOOP
+v_substr := SUBSTR(s, i, j - i + 1);--Substringleri bununla oluşturuyoruz
+found := TRUE;
+FOR k IN 1..v_chars.COUNT LOOP--Buradaki döngü ile birlikte t parametresindeki karakterlerle eşleştirir
+v_char := v_chars(k);
+v_pos := INSTR(v_substr, v_char);--indexlerini verir
+IF v_pos = 0 THEN--Bulamazsa hem bir üst döngüden çıkar hem de false a çeker
+found := FALSE;
+EXIT;
+END IF;
+END LOOP;
+IF found AND LENGTH(v_substr) < min_len THEN --En küçük alt dize mi diye kontrol eder
+min_len := LENGTH(v_substr);
+min_substr := v_substr;
+END IF;
+END LOOP;
+END LOOP;
+RETURN min_substr;
+else
+return '';
+end if;
+END;
+/
+BEGIN
+DBMS_OUTPUT.PUT_LINE('Minimum Window Substring: ' || min_win_subs('ADOBECODEBANC', 'ABC'));
+DBMS_OUTPUT.PUT_LINE('Minimum Window Substring: ' || min_win_subs('a', 'aa'));
+END;
+/
