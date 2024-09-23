@@ -1,0 +1,34 @@
+CREATE OR REPLACE PROCEDURE add_operators(num IN VARCHAR2,target IN NUMBER) IS
+son_sayi NUMBER;
+PROCEDURE alt(i IN NUMBER, mevcut_ifade IN VARCHAR2,deger IN NUMBER,son_sayi IN NUMBER) IS
+metin VARCHAR2(100);
+metin_to_sayi NUMBER;
+BEGIN
+IF i = LENGTH(num) + 1 THEN
+IF deger = target THEN
+DBMS_OUTPUT.PUT_LINE(mevcut_ifade || ' = ' || target);
+END IF;
+RETURN;
+END IF;
+FOR i IN i..LENGTH(num) LOOP
+metin := SUBSTR(num, i, i - i + 1);
+metin_to_sayi := TO_NUMBER(metin);
+IF i != i AND SUBSTR(num, i, 1) = '0' THEN
+CONTINUE;
+END IF;
+IF i = 1 THEN
+alt(i + 1, metin, metin_to_sayi, metin_to_sayi);
+ELSE
+alt(i + 1, mevcut_ifade || '+' || metin, deger + metin_to_sayi, metin_to_sayi);
+alt(i + 1, mevcut_ifade || '-' || metin, deger - metin_to_sayi, -metin_to_sayi);
+alt(i + 1, mevcut_ifade || '*' || metin, deger - son_sayi + son_sayi * metin_to_sayi, son_sayi * metin_to_sayi);
+END IF;
+END LOOP;
+END alt;
+BEGIN
+alt(1, '', 0, 0);
+END add_operators;
+/
+BEGIN
+add_operators('112', 3);
+END;/
